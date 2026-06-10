@@ -4,7 +4,7 @@ import type { Lesson, Unit } from '../types';
 import { hueVars } from '../lib/hues';
 import { confettiBurst } from '../lib/confetti';
 import { speak } from '../lib/speech';
-import { actions, getState, isLessonDone, isUnitDone, lessonState, useProgress } from '../lib/store';
+import { actions, currentLessonId, getState, isLessonDone, isUnitDone, lessonState, useProgress } from '../lib/store';
 import { CheckIcon, ChestIcon, FlameIcon, GemIcon, HeartIcon, LockIcon } from '../components/icons';
 import { Ipa, SpeakerRound } from '../components/bits';
 
@@ -30,12 +30,11 @@ export function Home({ onStartLesson }: { onStartLesson: (lessonId: string) => v
     toastTimer.current = window.setTimeout(() => setToast(null), 1700);
   };
 
-  // current lesson + its unit drive the header card
+  // current lesson + its unit drive the header card (respects skip-ahead)
   const current = (() => {
-    for (const level of LEVELS)
-      for (const unit of level.units)
-        for (const lesson of unit.lessons)
-          if (!isLessonDone(p, lesson.id)) return { level, unit, lesson };
+    const curId = currentLessonId(p);
+    const ref = curId ? findLesson(curId) : null;
+    if (ref) return { level: ref.level, unit: ref.unit, lesson: ref.lesson };
     const lv = LEVELS[LEVELS.length - 1];
     const u = lv.units[lv.units.length - 1];
     return { level: lv, unit: u, lesson: u.lessons[u.lessons.length - 1] };
@@ -144,7 +143,7 @@ export function Home({ onStartLesson }: { onStartLesson: (lessonId: string) => v
                             className={`node ${state}`}
                             data-current={state === 'current' || undefined}
                             style={{ transform: `translateX(${offset}px)` }}
-                            aria-label={`${lesson.title} — ${state === 'done' ? '完成' : state === 'current' ? '開始' : '未解鎖'}`}
+                            aria-label={`${lesson.title} — ${state === 'done' ? '完成' : state === 'current' ? '開始' : state === 'open' ? '已解鎖' : '未解鎖'}`}
                             onClick={() => {
                               if (state === 'locked') showToast(li === 0 ? '要先完成上一個單元' : '要先完成上一課');
                               else openLesson(lesson, unit, level.index, li + 1);

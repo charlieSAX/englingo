@@ -120,6 +120,29 @@ export function You() {
         </select>
       </div>
 
+      <div className="setrow">
+        <div>
+          <div className="sl">跳級</div>
+          <div className="sd">直接解鎖去更高級數，唔使逐課完成。早前嘅課堂一樣可以練習。</div>
+        </div>
+        <select
+          className="select"
+          style={{ width: 130 }}
+          aria-label="跳級"
+          value={p.unlockedFloor}
+          onChange={(e) => {
+            const floor = Number(e.target.value);
+            if (floor === 0 || window.confirm(`解鎖去第 ${floor} 級？所有第 ${floor} 級之前嘅課堂都會打開，但唔會當成完成。`)) {
+              actions.jumpToLevel(floor);
+            }
+          }}
+        >
+          <option value={0}>由第 1 級</option>
+          <option value={2}>跳去第 2 級</option>
+          <option value={3}>跳去第 3 級</option>
+        </select>
+      </div>
+
       <div className="setrow" style={{ flexDirection: 'column', alignItems: 'stretch' }}>
         <div>
           <div className="sl">備份同還原</div>

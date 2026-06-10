@@ -1,6 +1,6 @@
 import { useSyncExternalStore } from 'react';
 import type { Progress, WordStat } from '../types';
-import { LEVELS, allLessons } from '../data';
+import { LEVELS, allLessons, findLesson } from '../data';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Single localStorage-backed store. No backend, no accounts — the phone is the
@@ -26,7 +26,8 @@ const DEFAULTS: Progress = {
   lessons: {},
   chests: {},
   srs: {},
-  flags: {}
+  flags: {},
+  unlockedFloor: 0
 };
 
 function load(): Progress {
@@ -42,7 +43,8 @@ function load(): Progress {
       lessons: parsed.lessons ?? {},
       chests: parsed.chests ?? {},
       srs: parsed.srs ?? {},
-      flags: parsed.flags ?? {}
+      flags: parsed.flags ?? {},
+      unlockedFloor: parsed.unlockedFloor ?? 0
     };
   } catch {
     return { ...DEFAULTS };
@@ -121,6 +123,15 @@ export const actions = {
 
   setDailyGoal(xp: number) {
     set({ dailyGoalXp: xp });
+  },
+
+  /**
+   * Skip ahead: unlock every level with index <= floor (0 turns the skip off).
+   * Nothing is marked complete — the lessons simply become tappable and the
+   * START marker jumps to the first unfinished lesson in the chosen level.
+   */
+  jumpToLevel(floor: number) {
+    set({ unlockedFloor: Math.max(0, floor) });
   },
 
   loseHeart() {
@@ -221,7 +232,7 @@ export const actions = {
 
   /** Serialise all progress to a portable backup string. */
   exportProgress(): string {
-    return JSON.stringify({ app: 'idoialingo', v: 1, exportedAt: new Date().toISOString(), data: state }, null, 2);
+    return JSON.stringify({ app: 'englingo', v: 1, exportedAt: new Date().toISOString(), data: state }, null, 2);
   },
 
   /**
@@ -232,7 +243,7 @@ export const actions = {
   importProgress(raw: string): boolean {
     try {
       const parsed = JSON.parse(raw);
-      const data = (parsed?.app === 'idoialingo' && parsed.data ? parsed.data : parsed) as Partial<Progress>;
+      const data = (parsed && parsed.data && typeof parsed.data === 'object' ? parsed.data : parsed) as Partial<Progress>;
       if (!data || typeof data !== 'object' || !('lessons' in data)) return false;
       state = {
         ...DEFAULTS,
@@ -242,7 +253,8 @@ export const actions = {
         lessons: data.lessons ?? {},
         chests: data.chests ?? {},
         srs: data.srs ?? {},
-        flags: data.flags ?? {}
+        flags: data.flags ?? {},
+        unlockedFloor: data.unlockedFloor ?? 0
       };
       emit();
       return true;
@@ -266,19 +278,37 @@ export function isUnitDone(p: Progress, unitId: string): boolean {
   return false;
 }
 
-/** The first not-yet-completed lesson in course order. Null → course finished. */
+function levelIndexOfLesson(lessonId: string): number {
+  return findLesson(lessonId)?.level.index ?? 99;
+}
+
+/**
+ * The lesson the START marker sits on. With a skip floor set, this is the first
+ * unfinished lesson in a level at/above the floor; otherwise the first
+ * unfinished lesson overall. Null → everything reachable is done.
+ */
 export function currentLessonId(p: Progress): string | null {
+  const floor = p.unlockedFloor ?? 0;
+  if (floor > 0) {
+    for (const { lesson } of allLessons()) {
+      if (!isLessonDone(p, lesson.id) && levelIndexOfLesson(lesson.id) >= floor) return lesson.id;
+    }
+  }
   for (const { lesson } of allLessons()) {
     if (!isLessonDone(p, lesson.id)) return lesson.id;
   }
   return null;
 }
 
-export type NodeState = 'done' | 'current' | 'locked';
+export type NodeState = 'done' | 'current' | 'open' | 'locked';
 
 export function lessonState(p: Progress, lessonId: string): NodeState {
   if (isLessonDone(p, lessonId)) return 'done';
-  return currentLessonId(p) === lessonId ? 'current' : 'locked';
+  if (currentLessonId(p) === lessonId) return 'current';
+  // Skip-ahead: any level at/below the floor is tappable ("open").
+  const floor = p.unlockedFloor ?? 0;
+  if (floor > 0 && levelIndexOfLesson(lessonId) <= floor) return 'open';
+  return 'locked';
 }
 
 export function wordsLearned(p: Progress): number {

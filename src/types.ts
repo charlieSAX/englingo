@@ -129,6 +129,8 @@ export interface Progress {
   challenge: boolean;
   reduceMotion: boolean;
   voiceURI: string | null;
+  /** Skip-ahead: levels with index <= this are fully unlocked (0 = no skip). */
+  unlockedFloor: number;
   streak: { count: number; lastDay: string | null; freezes: number };
   days: Record<string, number>; // 'YYYY-MM-DD' -> xp earned
   lessons: Record<string, { done: true; perfect: boolean }>;

@@ -337,6 +337,15 @@ select:focus-visible {
 .node.done:active .face {
   box-shadow: 0 2px 0 var(--ux-d), 0 6px 12px -6px var(--ux-glow);
 }
+.node.open .face {
+  background: linear-gradient(180deg, #fff, var(--ux-t));
+  color: var(--ux-d);
+  box-shadow: 0 6px 0 var(--line-d), 0 12px 20px -8px var(--ux-glow);
+}
+.node.open:active .face {
+  box-shadow: 0 2px 0 var(--line-d), 0 6px 12px -8px var(--ux-glow);
+}
+
 .node.current {
   width: 84px;
   height: 84px;
