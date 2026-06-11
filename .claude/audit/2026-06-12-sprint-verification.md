@@ -52,7 +52,20 @@ Rubric: /Users/crosser/Obsidian/Projects/Rubric - EngLingo Sprint - 2026-06-12.m
 
 - 0 errors, 0 warnings across the full pass.
 
-## Outstanding at time of writing
+## 7. Cold Read + fixes (independent reviewer, fresh context)
 
-- Live deploy + re-verification on https://charliesax.github.io/englingo/
-  (criterion 9) — done after push; see session log.
+- Verdict: 7 PASS, 1 FAIL (criterion 8: em dashes in user-facing prose), 1 PENDING (deploy).
+- Fixed all user-facing em dashes (Conversation, Welcome, Practise, Stats, You,
+  LessonPlayer hint, Home aria-label, exercise reveal string). Re-verified at
+  runtime: document.body contains no em dash.
+- Content fixes from the review: 裙 now "Skirt" /skɜːt/; 廁所 now "Toilet"
+  /ˈtɔɪlɪt/; Lonely now 孤單 gu1 daan1; Exactly now 啱晒 ngaam1 saai3;
+  d-directions closing gloss completed (唔使客氣，祝你愉快！).
+
+## 8. Live deploy verification (criterion 9) — PASS
+
+- Pushed bba440d → GitHub Actions → live bundle assets/index-ZXEV0K_9.js
+  contains the new content (d-coffee, buymeacoffee, gan2zoeng1).
+- Live smoke at 390×844: 5 tabs, full lesson played to COMPLETE with
+  overflows NONE, +20 XP recorded, support-mini href correct, 8 dialogue
+  cards on 對話, service worker active. Test progress wiped afterwards.
