@@ -7,6 +7,7 @@ import { confettiBurst } from '../lib/confetti';
 import { hasEnglishVoice, isIOS, speak, stopSpeaking } from '../lib/speech';
 import { CheckIcon, HeartIcon, XIcon } from '../components/icons';
 import { IntroCard, ListenChoose, Pairs, PickImage, PickMeaning, WordBank, type ExerciseApi } from './exercises';
+import { SUPPORT_URL } from './You';
 
 export type Session = { kind: 'lesson'; lessonId: string } | { kind: 'practise' };
 
@@ -57,7 +58,7 @@ export function LessonPlayer({ session, onExit }: { session: Session; onExit: ()
     }
     const t = setTimeout(() => {
       if (!hasEnglishVoice() && !getState().flags['voiceNote']) {
-        setHint('搵唔到英文發音 — 喺 設定 → 輔助使用 → 朗讀內容 → 語音 → English 度加一把。');
+        setHint('搵唔到英文發音。喺 設定 → 輔助使用 → 朗讀內容 → 語音 → English 度加一把。');
         actions.setFlag('voiceNote');
       }
     }, 1500);
@@ -204,6 +205,9 @@ export function LessonPlayer({ session, onExit }: { session: Session; onExit: ()
                   <div className="v">{progress.streak.count}🔥</div>
                 </div>
               </div>
+              <a className="support-mini" href={SUPPORT_URL} target="_blank" rel="noopener noreferrer">
+                鍾意呢個 app？☕ 請我飲杯咖啡
+              </a>
             </div>
           </div>
         </div>

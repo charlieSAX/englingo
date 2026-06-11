@@ -137,4 +137,5 @@ export interface Progress {
   chests: Record<string, true>;
   srs: Record<string, WordStat>;
   flags: Record<string, true>; // one-time hints
+  dialogues: Record<string, true>; // conversation mode: completed dialogues
 }

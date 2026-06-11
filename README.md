@@ -8,7 +8,13 @@
 - **Audio:** the device's own English voice (`en-GB` preferred) via the Web Speech API — no audio files, works offline
 - **Architecture:** single-page PWA. No backend, no login, no database. Progress lives in `localStorage` under its own key (`englingo:v1`), so it never clashes with Idoialingo even on the same domain.
 
-Three levels · 24 units · ~120 English words mapped to authentic colloquial Cantonese, with exercises generated fresh by an engine every session. The Cantonese aspect unit is re-pointed to teach English tense (past / -ing / perfect / will).
+Six levels · 51 units · ~360 English words mapped to authentic colloquial Cantonese, with exercises generated fresh by an engine every session. Levels 1-3 cover the foundations; Levels 4-6 reach everyday secondary-school English (feelings, opinions, phrasal verbs, money, work, technology, natural expressions). The Cantonese aspect unit is re-pointed to teach English tense (past / -ing / perfect / will).
+
+Also in the app:
+
+- **對話 Conversation mode** — eight scripted real-life dialogues (ordering coffee, directions, the doctor, a job interview…). The other side speaks aloud; you choose the natural English reply from the Cantonese meaning. Fully offline.
+- **Responsive panels** — every exercise fits phones from 320×568 up with no scrolling (see `.claude/verify.md` for the harness).
+- **Support button** — a Buy Me a Coffee link in Settings and on the lesson-complete screen.
 
 ## Run it
 

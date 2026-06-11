@@ -2,11 +2,14 @@ import type { Level, Lesson, Unit, Vocab } from '../types';
 import { LEVEL1, VOCAB_L1 } from './level1';
 import { LEVEL2, VOCAB_L2 } from './level2';
 import { LEVEL3, VOCAB_L3 } from './level3';
+import { LEVEL4, VOCAB_L4 } from './level4';
+import { LEVEL5, VOCAB_L5 } from './level5';
+import { LEVEL6, VOCAB_L6 } from './level6';
 import { SENTENCES } from './sentences';
 
-export const LEVELS: Level[] = [LEVEL1, LEVEL2, LEVEL3];
+export const LEVELS: Level[] = [LEVEL1, LEVEL2, LEVEL3, LEVEL4, LEVEL5, LEVEL6];
 
-export const VOCab_ALL: Vocab[] = [...VOCAB_L1, ...VOCAB_L2, ...VOCAB_L3];
+export const VOCab_ALL: Vocab[] = [...VOCAB_L1, ...VOCAB_L2, ...VOCAB_L3, ...VOCAB_L4, ...VOCAB_L5, ...VOCAB_L6];
 
 export const VOCAB: Record<string, Vocab> = Object.fromEntries(
   VOCab_ALL.map((v) => [v.id, v])

@@ -65,7 +65,7 @@ export function Stats() {
     <div className="page-scroll">
       <h1 className="page-title">統計</h1>
       <p className="page-sub">
-        {todayXp >= p.dailyGoalXp ? `今日目標達成 — ${todayXp}/${p.dailyGoalXp} XP 🎉` : `今日：${todayXp}/${p.dailyGoalXp} XP`}
+        {todayXp >= p.dailyGoalXp ? `今日目標達成！${todayXp}/${p.dailyGoalXp} XP 🎉` : `今日：${todayXp}/${p.dailyGoalXp} XP`}
       </p>
 
       <div className="statgrid">
@@ -118,7 +118,7 @@ export function Stats() {
 
       {p.streak.freezes > 0 && (
         <p style={{ color: 'var(--muted)', fontWeight: 600, fontSize: 12.5, marginTop: 14, textAlign: 'center' }}>
-          🧊 仲有 {p.streak.freezes} 個連續凍結 — 漏咗一日都唔會斷火。
+          🧊 仲有 {p.streak.freezes} 個連續凍結，漏咗一日都唔會斷火。
         </p>
       )}
     </div>

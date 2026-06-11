@@ -97,7 +97,7 @@ function sentenceEx(s: Sentence, unitIds: string[], heard: boolean): Exercise {
 
 /** Sentences whose every needed word has been met (or is in this lesson). */
 function availableSentences(levelId: string, progress: Progress, lessonWordIds: string[]): Sentence[] {
-  const pool = SENTENCES[levelId as 'C1' | 'C2' | 'C3'] ?? [];
+  const pool = SENTENCES[levelId as keyof typeof SENTENCES] ?? [];
   const known = new Set(lessonWordIds);
   for (const [id, w] of Object.entries(progress.srs)) if (w.seen > 0) known.add(id);
   return pool.filter((s) => s.needs.every((n) => known.has(n)));

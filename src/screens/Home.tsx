@@ -143,7 +143,7 @@ export function Home({ onStartLesson }: { onStartLesson: (lessonId: string) => v
                             className={`node ${state}`}
                             data-current={state === 'current' || undefined}
                             style={{ transform: `translateX(${offset}px)` }}
-                            aria-label={`${lesson.title} — ${state === 'done' ? '完成' : state === 'current' ? '開始' : state === 'open' ? '已解鎖' : '未解鎖'}`}
+                            aria-label={`${lesson.title} · ${state === 'done' ? '完成' : state === 'current' ? '開始' : state === 'open' ? '已解鎖' : '未解鎖'}`}
                             onClick={() => {
                               if (state === 'locked') showToast(li === 0 ? '要先完成上一個單元' : '要先完成上一課');
                               else openLesson(lesson, unit, level.index, li + 1);

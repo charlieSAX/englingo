@@ -5,18 +5,21 @@ import type { HueKey, Progress } from './types';
 import { initSpeech, setPreferredVoice } from './lib/speech';
 import { actions, isLessonDone, useProgress, getState } from './lib/store';
 import { Grain } from './components/bits';
-import { NavLearnIcon, NavPractiseIcon, NavStatsIcon, NavYouIcon } from './components/icons';
+import { NavLearnIcon, NavPractiseIcon, NavStatsIcon, NavTalkIcon, NavYouIcon } from './components/icons';
 import { Welcome } from './screens/Welcome';
 import { Home } from './screens/Home';
 import { Practise } from './screens/Practise';
 import { Stats } from './screens/Stats';
 import { You } from './screens/You';
+import { ConversationList, DialoguePlayer } from './screens/Conversation';
+import { findDialogue } from './data/dialogues';
 import { LessonPlayer, type Session } from './screens/LessonPlayer';
 
-type Tab = 'learn' | 'practise' | 'stats' | 'you';
+type Tab = 'learn' | 'talk' | 'practise' | 'stats' | 'you';
 
 const TAB_HUES: Record<Tab, HueKey> = {
   learn: 'jade',
+  talk: 'coral',
   practise: 'teal',
   stats: 'violet',
   you: 'amber'
@@ -34,6 +37,7 @@ export default function App() {
   const p = useProgress();
   const [tab, setTab] = useState<Tab>('learn');
   const [session, setSession] = useState<Session | null>(null);
+  const [dialogueId, setDialogueId] = useState<string | null>(null);
 
   useEffect(() => {
     initSpeech(getState().voiceURI);
@@ -48,6 +52,7 @@ export default function App() {
   let hue: HueKey = TAB_HUES[tab];
   if (session?.kind === 'lesson') hue = findLesson(session.lessonId)?.unit.hue ?? 'jade';
   else if (session?.kind === 'practise') hue = 'teal';
+  else if (dialogueId) hue = findDialogue(dialogueId)?.hue ?? 'coral';
   else if (tab === 'learn') hue = currentUnitHue(p);
 
   return (
@@ -63,9 +68,12 @@ export default function App() {
             session={session}
             onExit={() => setSession(null)}
           />
+        ) : dialogueId ? (
+          <DialoguePlayer key={dialogueId} dialogueId={dialogueId} onExit={() => setDialogueId(null)} />
         ) : (
           <>
             {tab === 'learn' && <Home onStartLesson={(lessonId) => setSession({ kind: 'lesson', lessonId })} />}
+            {tab === 'talk' && <ConversationList onStart={(id) => setDialogueId(id)} />}
             {tab === 'practise' && <Practise onStart={() => setSession({ kind: 'practise' })} onGoLearn={() => setTab('learn')} />}
             {tab === 'stats' && <Stats />}
             {tab === 'you' && <You />}
@@ -73,6 +81,9 @@ export default function App() {
             <nav className="nav" aria-label="Main">
               <NavBtn label="學習" active={tab === 'learn'} onClick={() => setTab('learn')}>
                 <NavLearnIcon />
+              </NavBtn>
+              <NavBtn label="對話" active={tab === 'talk'} onClick={() => setTab('talk')}>
+                <NavTalkIcon />
               </NavBtn>
               <NavBtn label="練習" active={tab === 'practise'} onClick={() => setTab('practise')}>
                 <NavPractiseIcon />

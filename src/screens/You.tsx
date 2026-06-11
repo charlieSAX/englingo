@@ -2,6 +2,9 @@ import { useEffect, useRef, useState } from 'react';
 import { actions, useProgress, wordsLearned } from '../lib/store';
 import { englishVoices, isIOS, setPreferredVoice, speak } from '../lib/speech';
 
+/** Donations keep the app improving — opens Charlie's Buy Me a Coffee page. */
+export const SUPPORT_URL = 'https://buymeacoffee.com/charliewrol';
+
 function Switch({ on, onToggle, label }: { on: boolean; onToggle: () => void; label: string }) {
   return <button className={`switch${on ? ' on' : ''}`} role="switch" aria-checked={on} aria-label={label} onClick={onToggle} />;
 }
@@ -140,6 +143,9 @@ export function You() {
           <option value={0}>由第 1 級</option>
           <option value={2}>跳去第 2 級</option>
           <option value={3}>跳去第 3 級</option>
+          <option value={4}>跳去第 4 級</option>
+          <option value={5}>跳去第 5 級</option>
+          <option value={6}>跳去第 6 級</option>
         </select>
       </div>
 
@@ -164,6 +170,20 @@ export function You() {
         )}
       </div>
 
+      <a className="support" href={SUPPORT_URL} target="_blank" rel="noopener noreferrer">
+        <span className="cup" aria-hidden="true">
+          ☕
+        </span>
+        <span>
+          <span className="sl" style={{ display: 'block' }}>
+            請我飲杯咖啡
+          </span>
+          <span className="sd" style={{ display: 'block', marginTop: 2 }}>
+            呢個 app 完全免費。你嘅支持會令佢越嚟越好。
+          </span>
+        </span>
+      </a>
+
       <button
         className="danger"
         onClick={() => {
@@ -176,7 +196,7 @@ export function You() {
       </button>
 
       <p style={{ textAlign: 'center', color: 'var(--muted)', fontWeight: 600, fontSize: 12, marginTop: 18 }}>
-        EngLingo 英 · 所有嘢都存喺呢部機 — 無帳戶、無雲端。
+        EngLingo 英 · 所有嘢都存喺呢部機，無帳戶、無雲端。
       </p>
     </div>
   );

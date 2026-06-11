@@ -29,7 +29,7 @@ function useAutoSpeak(text: string | null, delay = 300) {
 }
 
 function reveal(w: Vocab): string {
-  return `${w.en} ${w.ipa ?? ''} — ${w.trad}`;
+  return `${w.en} ${w.ipa ?? ''} · ${w.trad}`;
 }
 
 // ── 1. intro ─────────────────────────────────────────────────────────────────
@@ -46,7 +46,7 @@ export function IntroCard({ ex }: { ex: IntroEx }) {
       <div className="prompt">新生字</div>
       <div className="sub">撳一下聽吓，然後繼續</div>
       <div className="hero">
-        <div className="char-big f-hero" style={{ marginTop: 30 }}>
+        <div className="char-big f-hero">
           {w.en}
         </div>
         <div className="jyut">

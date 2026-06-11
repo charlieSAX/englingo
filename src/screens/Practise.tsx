@@ -62,7 +62,7 @@ export function Practise({ onStart, onGoLearn }: { onStart: () => void; onGoLear
         開始練習 · +12 XP
       </button>
       <p style={{ textAlign: 'center', color: 'var(--muted)', fontWeight: 600, fontSize: 12.5, marginTop: 14 }}>
-        每次都會重新生成 — 練習永遠唔會用完。
+        每次都會重新生成，練習永遠唔會用完。
       </p>
     </div>
   );

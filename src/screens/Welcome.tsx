@@ -21,7 +21,7 @@ export function Welcome() {
             英
           </span>
         </div>
-        <p className="tag">輕輕鬆鬆學英文 — 真人發音、IPA 音標，一步一步嚟。</p>
+        <p className="tag">輕輕鬆鬆學英文。真人發音、IPA 音標，一步一步嚟。</p>
         <div className="heroline">
           <div className="char-big f-hero">Hello</div>
           <div className="jyut" style={{ color: 'var(--jade-d)', fontWeight: 700, fontSize: 20, marginTop: 8 }}>

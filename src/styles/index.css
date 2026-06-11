@@ -1585,6 +1585,60 @@ select:focus-visible {
   box-shadow: 0 1px 0 color-mix(in srgb, var(--ux) 45%, #ffffff);
 }
 
+/* support / donation */
+.support {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  text-decoration: none;
+  color: inherit;
+  background: linear-gradient(135deg, #fff3d6, #ffe2b0);
+  border-radius: 18px;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+  box-shadow: 0 5px 0 #e0a93f, 0 12px 20px -12px rgba(224, 140, 0, 0.45);
+  transition: transform 0.1s, box-shadow 0.12s;
+}
+.support:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 #e0a93f;
+}
+.support .cup {
+  width: 44px;
+  height: 44px;
+  flex: none;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 23px;
+  background: #fff;
+  box-shadow: inset 0 0 0 1px #f1d9a8;
+}
+.support .sl {
+  color: #7a4d00;
+}
+.support .sd {
+  color: #9a6b1f;
+}
+.support-mini {
+  display: inline-block;
+  margin-top: 22px;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 13px;
+  color: #9a6b1f;
+  background: linear-gradient(135deg, #fff3d6, #ffe2b0);
+  padding: 10px 16px;
+  border-radius: 99px;
+  box-shadow: 0 4px 0 #e0a93f;
+  transition: transform 0.1s, box-shadow 0.12s;
+}
+.support-mini:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 #e0a93f;
+}
+
 .danger {
   width: 100%;
   border: 0;
@@ -1741,6 +1795,437 @@ select:focus-visible {
   to {
     transform: translateY(840px) rotate(640deg);
     opacity: 0.9;
+  }
+}
+
+/* ── conversation mode ───────────────────────────────────────────────────── */
+
+.convo-card {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  text-align: left;
+  border: 0;
+  cursor: pointer;
+  background: var(--card);
+  border-radius: 20px;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+  box-shadow: 0 5px 0 var(--line-d), 0 12px 20px -12px rgba(27, 26, 23, 0.25);
+  transition: transform 0.1s, box-shadow 0.12s;
+}
+.convo-card:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 var(--line-d);
+}
+.cc-icon {
+  width: 46px;
+  height: 46px;
+  flex: none;
+  border-radius: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  background: linear-gradient(180deg, var(--ux), var(--ux-d));
+  box-shadow: 0 4px 0 var(--ux-lip);
+}
+.cc-icon svg {
+  width: 24px;
+  height: 24px;
+}
+.cc-body {
+  flex: 1;
+  min-width: 0;
+}
+.cc-title {
+  display: block;
+  font-weight: 800;
+  font-size: 16px;
+}
+.cc-han {
+  font-weight: 700;
+  color: var(--ux-d);
+  font-size: 14.5px;
+  margin-left: 2px;
+}
+.cc-sub {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  margin-top: 2px;
+}
+.cc-done {
+  width: 26px;
+  height: 26px;
+  flex: none;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  background: var(--jade);
+}
+.cc-done svg {
+  width: 15px;
+  height: 15px;
+}
+
+.convo-root {
+  position: absolute;
+  inset: 0;
+}
+.convo-head {
+  flex: 1;
+  min-width: 0;
+}
+.convo-head .ch-title {
+  font-family: 'Fraunces', serif;
+  font-weight: 600;
+  font-size: 17px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.convo-head .ch-sub {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.convo-scroll {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 58px;
+  bottom: 16px;
+  overflow-y: auto;
+  padding: 12px 18px 16px;
+  scrollbar-width: none;
+}
+.convo-scroll::-webkit-scrollbar {
+  width: 0;
+}
+.convo-scroll.with-options {
+  bottom: 236px;
+}
+
+.cb {
+  display: flex;
+  margin: 9px 0;
+}
+.cb.them {
+  justify-content: flex-start;
+}
+.cb.you {
+  justify-content: flex-end;
+}
+.cb-bubble {
+  max-width: 82%;
+  border: 0;
+  cursor: pointer;
+  text-align: left;
+  border-radius: 19px;
+  padding: 11px 14px;
+  animation: rise 0.35s cubic-bezier(0.2, 0.8, 0.25, 1);
+}
+.cb.them .cb-bubble {
+  background: var(--card);
+  border-bottom-left-radius: 6px;
+  box-shadow: 0 4px 0 var(--line-d), 0 10px 18px -12px rgba(27, 26, 23, 0.25);
+}
+.cb.you .cb-bubble {
+  background: linear-gradient(180deg, var(--ux), var(--ux-d));
+  color: #fff;
+  border-bottom-right-radius: 6px;
+  box-shadow: 0 4px 0 var(--ux-lip), 0 10px 18px -12px var(--ux-glow);
+}
+.cb-en {
+  display: block;
+  font-family: var(--font-hero), serif;
+  font-weight: 700;
+  font-size: 17.5px;
+  line-height: 1.3;
+}
+.cb-cn {
+  display: block;
+  font-size: 12.5px;
+  font-weight: 600;
+  margin-top: 3px;
+  color: var(--muted);
+}
+.cb.you .cb-cn {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.convo-options {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 7;
+  padding: 12px 18px calc(16px + env(safe-area-inset-bottom, 0px));
+  background: linear-gradient(180deg, rgba(255, 249, 243, 0), rgba(255, 249, 243, 0.97) 26%);
+}
+.co-prompt {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--ux-d);
+  margin: 0 2px 10px;
+  line-height: 1.45;
+}
+.co-opt {
+  width: 100%;
+  margin-bottom: 9px;
+  font-size: 15.5px;
+}
+.co-opt.shake {
+  animation: shake 0.35s;
+}
+
+.convo-done {
+  text-align: center;
+  padding: 26px 10px 10px;
+}
+.convo-done h1 {
+  font-family: 'Fraunces', serif;
+  font-weight: 600;
+  font-size: 28px;
+  margin: 8px 0 4px;
+}
+.convo-done p {
+  color: var(--muted);
+  font-weight: 700;
+  margin: 0 0 6px;
+}
+.convo-done .trophy {
+  font-size: 70px;
+}
+.convo-done .cont {
+  max-width: 280px;
+}
+
+@media (max-height: 760px) {
+  .convo-scroll.with-options {
+    bottom: 212px;
+  }
+  .cb-en {
+    font-size: 15.5px;
+  }
+  .co-opt {
+    padding: 11px 13px;
+    font-size: 14px;
+    margin-bottom: 8px;
+  }
+  .co-prompt {
+    font-size: 12.5px;
+    margin-bottom: 8px;
+  }
+  .convo-done .trophy {
+    font-size: 54px;
+  }
+}
+
+/* ── short screens: compact the lesson panels so nothing needs scrolling ──
+   Tier 1 (≤760px tall) covers iPhone SE/8/13 mini class; Tier 2 (≤600px)
+   covers the very smallest. Only density changes — same design language. */
+
+@media (max-height: 760px) {
+  .stage {
+    top: 50px;
+    bottom: 104px;
+  }
+  .exscreen {
+    padding: 8px 18px;
+  }
+  .prompt {
+    font-size: 20px;
+    margin: 4px 2px 2px;
+  }
+  .sub {
+    font-size: 12.5px;
+    margin-bottom: 12px;
+  }
+  .hero {
+    padding-top: 4px;
+  }
+  .char-big {
+    font-size: 52px;
+    margin-top: 10px;
+  }
+  .hero .jyut {
+    font-size: 20px;
+    margin-top: 6px;
+  }
+  .hero .eng {
+    font-size: 19px;
+    margin-top: 6px;
+  }
+  .speak {
+    margin-top: 14px;
+    padding: 10px 16px;
+  }
+  .qrow {
+    padding: 10px 12px;
+    margin-bottom: 12px;
+    gap: 11px;
+  }
+  .qrow .qc {
+    font-size: 28px;
+  }
+  .qrow .qj {
+    font-size: 14px;
+  }
+  .qrow .qe {
+    font-size: 21px;
+  }
+  .spk2 {
+    width: 46px;
+    height: 46px;
+  }
+  .grid2 {
+    gap: 10px;
+  }
+  .opt {
+    padding: 12px 8px;
+    border-radius: 18px;
+  }
+  .opt .om {
+    font-size: 15px;
+    padding: 6px 2px;
+  }
+  .opt .ol {
+    font-size: 11.5px;
+  }
+  .list-opts {
+    gap: 9px;
+  }
+  .lopt {
+    padding: 12px 14px;
+  }
+  .lopt .f-han {
+    font-size: 19px !important;
+  }
+  .pairs {
+    gap: 9px 12px;
+  }
+  .ptile {
+    min-height: 56px;
+    padding: 9px 8px;
+    border-radius: 15px;
+  }
+  .ptile .pc {
+    font-size: 20px;
+  }
+  .ptile .pj {
+    font-size: 10.5px;
+  }
+  .ptile .pen {
+    font-size: 15px;
+  }
+  .wb-answer {
+    min-height: 52px;
+    padding: 6px 2px 10px;
+    margin-bottom: 12px;
+  }
+  .wb-bank {
+    gap: 8px;
+  }
+  .wtile {
+    padding: 8px 11px;
+    border-radius: 12px;
+  }
+  .wtile .wc {
+    font-size: 19px;
+  }
+  .footer {
+    padding: 10px 18px 16px;
+  }
+  .btn {
+    padding: 14px;
+  }
+  .banner {
+    padding: 10px 14px;
+    margin-bottom: 9px;
+    font-size: 14px;
+  }
+  .done-wrap {
+    padding-top: 6px;
+  }
+  .trophy {
+    font-size: 72px;
+  }
+  .done-wrap h1 {
+    font-size: 27px;
+  }
+  .scards {
+    margin-top: 16px;
+  }
+  .scard .v {
+    font-size: 24px;
+  }
+  .hud {
+    padding: 14px 18px 6px;
+  }
+  .welcome .heroline {
+    margin-top: 20px;
+  }
+  .welcome .heroline .char-big {
+    font-size: 48px;
+  }
+  .wordmark {
+    font-size: 38px;
+  }
+}
+
+@media (max-height: 600px) {
+  .stage {
+    top: 46px;
+    bottom: 96px;
+  }
+  .char-big {
+    font-size: 42px;
+  }
+  .prompt {
+    font-size: 18px;
+  }
+  .sub {
+    margin-bottom: 8px;
+  }
+  .qrow .qc {
+    font-size: 24px;
+  }
+  .opt .om {
+    font-size: 14px;
+    padding: 4px 2px;
+  }
+  .lopt {
+    padding: 10px 12px;
+    font-size: 15px;
+  }
+  .ptile {
+    min-height: 48px;
+    padding: 7px 6px;
+  }
+  .ptile .pc {
+    font-size: 17px;
+  }
+  .ptile .pen {
+    font-size: 13.5px;
+  }
+  .wtile .wc {
+    font-size: 16px;
+  }
+  .trophy {
+    font-size: 56px;
+  }
+  .done-wrap h1 {
+    font-size: 23px;
+  }
+  .btn {
+    padding: 12px;
   }
 }
 

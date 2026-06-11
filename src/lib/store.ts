@@ -27,6 +27,7 @@ const DEFAULTS: Progress = {
   chests: {},
   srs: {},
   flags: {},
+  dialogues: {},
   unlockedFloor: 0
 };
 
@@ -44,6 +45,7 @@ function load(): Progress {
       chests: parsed.chests ?? {},
       srs: parsed.srs ?? {},
       flags: parsed.flags ?? {},
+      dialogues: parsed.dialogues ?? {},
       unlockedFloor: parsed.unlockedFloor ?? 0
     };
   } catch {
@@ -219,6 +221,16 @@ export const actions = {
     });
   },
 
+  /** Finish a conversation: award XP and remember it is done. */
+  completeDialogue(dialogueId: string, xp: number) {
+    const today = dayKey();
+    set({
+      xpTotal: state.xpTotal + xp,
+      days: { ...state.days, [today]: (state.days[today] ?? 0) + xp },
+      dialogues: { ...state.dialogues, [dialogueId]: true }
+    });
+  },
+
   claimChest(unitId: string, gems: number) {
     if (state.chests[unitId]) return false;
     set({ chests: { ...state.chests, [unitId]: true }, gems: state.gems + gems });
@@ -254,6 +266,7 @@ export const actions = {
         chests: data.chests ?? {},
         srs: data.srs ?? {},
         flags: data.flags ?? {},
+        dialogues: data.dialogues ?? {},
         unlockedFloor: data.unlockedFloor ?? 0
       };
       emit();
