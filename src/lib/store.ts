@@ -28,6 +28,7 @@ const DEFAULTS: Progress = {
   srs: {},
   flags: {},
   dialogues: {},
+  speakPractice: true,
   unlockedFloor: 0
 };
 
@@ -46,6 +47,7 @@ function load(): Progress {
       srs: parsed.srs ?? {},
       flags: parsed.flags ?? {},
       dialogues: parsed.dialogues ?? {},
+      speakPractice: parsed.speakPractice ?? true,
       unlockedFloor: parsed.unlockedFloor ?? 0
     };
   } catch {
@@ -117,6 +119,10 @@ export const actions = {
 
   setReduceMotion(on: boolean) {
     set({ reduceMotion: on });
+  },
+
+  setSpeakPractice(on: boolean) {
+    set({ speakPractice: on });
   },
 
   setFlag(flag: string) {
@@ -267,6 +273,7 @@ export const actions = {
         srs: data.srs ?? {},
         flags: data.flags ?? {},
         dialogues: data.dialogues ?? {},
+        speakPractice: data.speakPractice ?? true,
         unlockedFloor: data.unlockedFloor ?? 0
       };
       emit();

@@ -6,7 +6,7 @@ import { actions, dueWords, getState, useProgress } from '../lib/store';
 import { confettiBurst } from '../lib/confetti';
 import { hasEnglishVoice, isIOS, speak, stopSpeaking } from '../lib/speech';
 import { CheckIcon, HeartIcon, XIcon } from '../components/icons';
-import { IntroCard, ListenChoose, Pairs, PickImage, PickMeaning, WordBank, type ExerciseApi } from './exercises';
+import { IntroCard, ListenChoose, Pairs, PickImage, PickMeaning, SpeakIt, WordBank, type ExerciseApi } from './exercises';
 import { SUPPORT_URL } from './You';
 
 export type Session = { kind: 'lesson'; lessonId: string } | { kind: 'practise' };
@@ -78,6 +78,17 @@ export function LessonPlayer({ session, onExit }: { session: Session; onExit: ()
         setStats((s) => ({ answered: s.answered + 1, correct: s.correct + (ok ? 1 : 0) }));
         setBanner({ good: ok, title: praise ?? PRAISE[Math.floor(Math.random() * PRAISE.length)] });
         setPhase('checked');
+      },
+      skip: () => {
+        // advance without recording anything (mic unavailable / learner skipped)
+        setBanner(null);
+        setCheckable(false);
+        checkerRef.current = null;
+        if (idx + 1 >= total) setPhase('complete');
+        else {
+          setIdx(idx + 1);
+          setPhase('work');
+        }
       }
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -222,7 +233,7 @@ export function LessonPlayer({ session, onExit }: { session: Session; onExit: ()
 
   // ── playing ─────────────────────────────────────────────────────────────────
   const isIntro = ex?.kind === 'intro';
-  const isPairs = ex?.kind === 'pairs';
+  const isPairs = ex?.kind === 'pairs' || ex?.kind === 'speakIt'; // self-driven: no Check button while working
   const btnLabel = phase === 'checked' ? '繼續' : isIntro ? '繼續' : '檢查';
   const btnDisabled = phase === 'work' && !isIntro && !checkable;
   const btnClass = `btn${phase === 'checked' ? ' good' : ''}${btnDisabled ? ' dis' : ''}`;
@@ -257,6 +268,7 @@ export function LessonPlayer({ session, onExit }: { session: Session; onExit: ()
           {ex?.kind === 'listenChoose' && <ListenChoose ex={ex} api={api} />}
           {ex?.kind === 'pairs' && <Pairs ex={ex} api={api} />}
           {ex?.kind === 'wordBank' && <WordBank ex={ex} api={api} />}
+          {ex?.kind === 'speakIt' && <SpeakIt ex={ex} api={api} />}
         </div>
       </div>
 

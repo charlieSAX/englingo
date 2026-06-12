@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { DIALOGUES, findDialogue, type DialogueLine, type YourTurn } from '../data/dialogues';
 import { hueVars } from '../lib/hues';
-import { speak, stopSpeaking } from '../lib/speech';
+import { speak, speakAsync, stopSpeaking } from '../lib/speech';
+import { hasRecognition, hearOnce, matchSpoken } from '../lib/recognition';
 import { actions, getState, useProgress } from '../lib/store';
 import { confettiBurst } from '../lib/confetti';
-import { CheckIcon, NavTalkIcon, XIcon } from '../components/icons';
+import { CheckIcon, MicIcon, NavTalkIcon, XIcon } from '../components/icons';
 
 const DIALOGUE_XP = 15;
 
@@ -64,17 +65,23 @@ interface Bubble {
 
 export function DialoguePlayer({ dialogueId, onExit }: { dialogueId: string; onExit: () => void }) {
   const dlg = findDialogue(dialogueId);
+  const p = useProgress();
   const [idx, setIdx] = useState(0); // next line to play
   const [bubbles, setBubbles] = useState<Bubble[]>([]);
   const [wrong, setWrong] = useState<string | null>(null);
   const [done, setDone] = useState(false);
+  const [busy, setBusy] = useState(false); // a line is being spoken
+  const [listening, setListening] = useState(false);
+  const [heard, setHeard] = useState<string | null>(null);
+  const [micOk, setMicOk] = useState(() => hasRecognition());
   const [stats, setStats] = useState({ answered: 0, correct: 0 });
   const scrollRef = useRef<HTMLDivElement>(null);
   const awardedRef = useRef(false);
 
   const line: DialogueLine | undefined = dlg?.lines[idx];
 
-  // advance through consecutive "them" lines automatically
+  // advance through consecutive "them" lines, waiting for each sentence to
+  // finish speaking before the next bubble appears
   useEffect(() => {
     if (!dlg || done) return;
     if (idx >= dlg.lines.length) {
@@ -82,14 +89,24 @@ export function DialoguePlayer({ dialogueId, onExit }: { dialogueId: string; onE
       return;
     }
     const l = dlg.lines[idx];
-    if (l.speaker === 'them') {
-      const t = setTimeout(() => {
-        setBubbles((b) => [...b, { side: 'them', en: l.en, cn: l.cn }]);
-        speak(l.en);
+    if (l.speaker !== 'them') return;
+    let cancelled = false;
+    const t = setTimeout(async () => {
+      if (cancelled) return;
+      setBusy(true);
+      setBubbles((b) => [...b, { side: 'them', en: l.en, cn: l.cn }]);
+      await speakAsync(l.en);
+      if (cancelled) return;
+      setTimeout(() => {
+        if (cancelled) return;
+        setBusy(false);
         setIdx((i) => i + 1);
-      }, bubbles.length === 0 ? 500 : 1300);
-      return () => clearTimeout(t);
-    }
+      }, 500);
+    }, bubbles.length === 0 ? 450 : 250);
+    return () => {
+      cancelled = true;
+      clearTimeout(t);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [idx, dlg, done]);
 
@@ -125,8 +142,18 @@ export function DialoguePlayer({ dialogueId, onExit }: { dialogueId: string; onE
 
   if (!dlg) return null;
 
+  const acceptAnswer = async (yt: YourTurn) => {
+    setWrong(null);
+    setHeard(null);
+    setBusy(true);
+    setBubbles((b) => [...b, { side: 'you', en: yt.en, cn: yt.cn }]);
+    await speakAsync(yt.en); // say her line in full before the reply comes
+    setBusy(false);
+    setIdx((i) => i + 1);
+  };
+
   const pick = (opt: string) => {
-    if (!line || line.speaker !== 'you') return;
+    if (!line || line.speaker !== 'you' || busy || listening) return;
     const yt = line as YourTurn;
     const ok = opt === yt.en;
     setStats((s) => ({ answered: s.answered + 1, correct: s.correct + (ok ? 1 : 0) }));
@@ -135,13 +162,35 @@ export function DialoguePlayer({ dialogueId, onExit }: { dialogueId: string; onE
       setTimeout(() => setWrong(null), 700);
       return;
     }
-    setWrong(null);
-    setBubbles((b) => [...b, { side: 'you', en: yt.en, cn: yt.cn }]);
-    speak(yt.en);
-    setIdx((i) => i + 1);
+    void acceptAnswer(yt);
   };
 
-  const yourTurn = !done && line?.speaker === 'you';
+  /** Speak the reply instead of tapping it. */
+  const speakAnswer = async () => {
+    if (!line || line.speaker !== 'you' || busy || listening) return;
+    const yt = line as YourTurn;
+    setListening(true);
+    setHeard(null);
+    const r = await hearOnce();
+    setListening(false);
+    if (!r.ok) {
+      if (r.error === 'silent') setHeard('（聽唔到，再試吓）');
+      else {
+        setMicOk(false); // permission refused or engine broken: hide the mic
+        setHeard(null);
+      }
+      return;
+    }
+    const verdict = matchSpoken(yt.en, r.transcript);
+    setStats((s) => ({ answered: s.answered + 1, correct: s.correct + (verdict.ok ? 1 : 0) }));
+    if (verdict.ok) {
+      void acceptAnswer(yt);
+    } else {
+      setHeard(`你講咗：${r.transcript.split('\n')[0]}`);
+    }
+  };
+
+  const yourTurn = !done && line?.speaker === 'you' && !busy;
   const acc = stats.answered > 0 ? Math.round((stats.correct / stats.answered) * 100) : 100;
 
   return (
@@ -209,6 +258,18 @@ export function DialoguePlayer({ dialogueId, onExit }: { dialogueId: string; onE
               {o}
             </button>
           ))}
+          {micOk && p.speakPractice && (
+            <button
+              className={`co-mic${listening ? ' listening' : ''}`}
+              onClick={speakAnswer}
+              disabled={listening}
+              aria-label="用講嘅答"
+            >
+              <MicIcon />
+              <span className="f-han">{listening ? '聽緊⋯⋯講啦' : '唔撳喇，直接講！'}</span>
+            </button>
+          )}
+          {heard && <div className="mic-heard co-heard">{heard}</div>}
         </div>
       )}
     </div>

@@ -64,7 +64,8 @@ export type ExerciseType =
   | 'listenChoose'
   | 'pairs'
   | 'wordBank'
-  | 'typeHeard';
+  | 'typeHeard'
+  | 'speakIt';
 
 export interface IntroEx {
   kind: 'intro';
@@ -105,13 +106,25 @@ export interface WordBankEx {
   bank: { t: string; j: string }[]; // answer tokens + distractor tiles, shuffled
 }
 
+export interface SpeakItEx {
+  kind: 'speakIt';
+  /** the English to say aloud */
+  text: string;
+  ipa?: string;
+  /** Cantonese meaning shown under the English */
+  cn: string;
+  /** vocab ids credited on success (for the SRS) */
+  wordIds: string[];
+}
+
 export type Exercise =
   | IntroEx
   | PickImageEx
   | PickMeaningEx
   | ListenChooseEx
   | PairsEx
-  | WordBankEx;
+  | WordBankEx
+  | SpeakItEx;
 
 export interface WordStat {
   s: number; // strength 0..5
@@ -138,4 +151,6 @@ export interface Progress {
   srs: Record<string, WordStat>;
   flags: Record<string, true>; // one-time hints
   dialogues: Record<string, true>; // conversation mode: completed dialogues
+  /** speak-and-check exercises on/off (only shown when the device supports it) */
+  speakPractice: boolean;
 }

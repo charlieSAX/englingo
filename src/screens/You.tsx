@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { actions, useProgress, wordsLearned } from '../lib/store';
 import { englishVoices, isIOS, setPreferredVoice, speak } from '../lib/speech';
+import { hasRecognition } from '../lib/recognition';
 
 /** Donations keep the app improving — opens Charlie's Buy Me a Coffee page. */
 export const SUPPORT_URL = 'https://buymeacoffee.com/charliewrol';
@@ -104,6 +105,16 @@ export function You() {
         </div>
         <Switch on={p.reduceMotion} onToggle={() => actions.setReduceMotion(!p.reduceMotion)} label="減少動態效果" />
       </div>
+
+      {hasRecognition() && (
+        <div className="setrow">
+          <div>
+            <div className="sl">口講練習</div>
+            <div className="sd">課堂入面會有「跟住講」題目，對話都可以直接講答案。用你部機自己嘅語音辨識。</div>
+          </div>
+          <Switch on={p.speakPractice} onToggle={() => actions.setSpeakPractice(!p.speakPractice)} label="口講練習" />
+        </div>
+      )}
 
       <div className="setrow">
         <div>

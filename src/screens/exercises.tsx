@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import type { IntroEx, ListenChooseEx, PairsEx, PickImageEx, PickMeaningEx, Vocab, WordBankEx } from '../types';
+import type { IntroEx, ListenChooseEx, PairsEx, PickImageEx, PickMeaningEx, SpeakItEx, Vocab, WordBankEx } from '../types';
 import { Ipa, SpeakerRound, SpeakerSquare } from '../components/bits';
 import { speak } from '../lib/speech';
+import { hearOnce, matchSpoken } from '../lib/recognition';
 import { actions } from '../lib/store';
+import { MicIcon } from '../components/icons';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // EngLingo exercises — for Cantonese speakers learning English.
@@ -18,6 +20,8 @@ export interface ExerciseApi {
   setCheckable(on: boolean): void;
   registerChecker(fn: () => { ok: boolean; reveal?: string }): void;
   selfComplete(ok: boolean, praise?: string): void;
+  /** advance without recording an answer (e.g. mic unavailable / skipped) */
+  skip(): void;
 }
 
 function useAutoSpeak(text: string | null, delay = 300) {
@@ -359,7 +363,7 @@ export function WordBank({ ex, api }: { ex: WordBankEx; api: ExerciseApi }) {
       if (ok) speak(sentenceText);
       return {
         ok,
-        reveal: ok ? undefined : `${ex.sentence.en} — ${ex.sentence.cn}`
+        reveal: ok ? undefined : `${ex.sentence.en} · ${ex.sentence.cn}`
       };
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -419,6 +423,89 @@ export function WordBank({ ex, api }: { ex: WordBankEx; api: ExerciseApi }) {
           ))}
         </div>
       )}
+    </>
+  );
+}
+
+// ── 7. speakIt (say it aloud, Duolingo-style) ────────────────────────────────
+
+export function SpeakIt({ ex, api }: { ex: SpeakItEx; api: ExerciseApi }) {
+  const [phase, setPhase] = useState<'idle' | 'listening' | 'done'>('idle');
+  const [heard, setHeard] = useState<string | null>(null);
+  const [fails, setFails] = useState(0);
+  const [note, setNote] = useState<string | null>(null);
+  useAutoSpeak(ex.text);
+
+  const listen = async () => {
+    if (phase !== 'idle') return;
+    setPhase('listening');
+    setNote(null);
+    const r = await hearOnce();
+    if (!r.ok) {
+      setPhase('idle');
+      if (r.error === 'silent') {
+        setNote('聽唔到喎，行近啲再講一次。');
+        return;
+      }
+      // mic refused or engine unavailable: bow out gracefully, no penalty
+      setNote(r.error === 'denied' ? '冇咪嘅權限，呢題跳過。' : '呢部機暫時用唔到口講練習，跳過。');
+      setTimeout(() => api.skip(), 1400);
+      return;
+    }
+    const verdict = matchSpoken(ex.text, r.transcript);
+    setHeard(r.transcript.split('\n')[0]);
+    if (verdict.ok) {
+      setPhase('done');
+      api.selfComplete(true, '講得好! · Nice speaking');
+      return;
+    }
+    const f = fails + 1;
+    setFails(f);
+    setPhase('idle');
+    setNote(f >= 2 ? '差少少。可以再試，或者跳過。' : '差少少，再試一次。聽多次先講都得。');
+  };
+
+  return (
+    <>
+      <div className="prompt">跟住講</div>
+      <div className="sub">大聲講出呢句英文</div>
+      <div className="qrow">
+        <SpeakerSquare text={ex.text} label="聽英文" />
+        <div>
+          <div className="qc f-hero" style={{ fontSize: ex.text.length > 18 ? 24 : undefined }}>
+            {ex.text}
+          </div>
+          <div className="qj">
+            <Ipa ipa={ex.ipa} />
+          </div>
+          <div className="f-han" style={{ color: 'var(--muted)', fontWeight: 600, fontSize: 14, marginTop: 2 }}>
+            {ex.cn}
+          </div>
+        </div>
+      </div>
+
+      <div className="speakit">
+        <button
+          className={`mic${phase === 'listening' ? ' listening' : ''}`}
+          onClick={listen}
+          disabled={phase !== 'idle'}
+          aria-label="撳一下，然後講"
+        >
+          <MicIcon />
+        </button>
+        <div className="mic-cap f-han">{phase === 'listening' ? '聽緊⋯⋯講啦' : phase === 'done' ? '正！' : '撳一下，然後講'}</div>
+        {heard && phase !== 'done' && (
+          <div className="mic-heard">
+            你講咗：<span>{heard}</span>
+          </div>
+        )}
+        {note && <div className="mic-note f-han">{note}</div>}
+        {fails >= 2 && phase === 'idle' && (
+          <button className="softbtn mic-skip" onClick={() => api.skip()}>
+            跳過呢題
+          </button>
+        )}
+      </div>
     </>
   );
 }

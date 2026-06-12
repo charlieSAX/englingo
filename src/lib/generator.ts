@@ -1,6 +1,7 @@
 import type { Exercise, Sentence, Vocab } from '../types';
 import { LEVELS, SENTENCES, VOCAB, findLesson, levelNewWords, unitWords } from '../data';
 import type { Progress } from '../types';
+import { hasRecognition } from './recognition';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // The exercise engine. Content is a vocabulary bank + lesson groupings; this
@@ -103,10 +104,20 @@ function availableSentences(levelId: string, progress: Progress, lessonWordIds: 
   return pool.filter((s) => s.needs.every((n) => known.has(n)));
 }
 
+// ── speak-and-check ──────────────────────────────────────────────────────────
+
+function speakItWord(w: Vocab): Exercise {
+  return { kind: 'speakIt', text: w.en, ipa: w.ipa, cn: w.trad, wordIds: [w.id] };
+}
+
+function speakItSentence(s: Sentence): Exercise {
+  return { kind: 'speakIt', text: s.en, cn: s.cn, wordIds: s.needs };
+}
+
 /** Avoid the same word twice in a row. */
 function spread(exs: Exercise[]): Exercise[] {
   const keyOf = (e: Exercise) =>
-    e.kind === 'pairs' ? 'pairs' : e.kind === 'wordBank' ? 'sentence' : e.word.id;
+    e.kind === 'pairs' ? 'pairs' : e.kind === 'wordBank' ? 'sentence' : e.kind === 'speakIt' ? `speak:${e.text}` : e.word.id;
   const a = exs.slice();
   for (let i = 1; i < a.length; i++) {
     if (keyOf(a[i]) === keyOf(a[i - 1])) {
@@ -170,7 +181,7 @@ export function generateLesson(lessonId: string, progress: Progress): Exercise[]
     let overshoot = graded.length - target;
     for (const e of graded) {
       const isReviewRec =
-        e.kind !== 'pairs' && e.kind !== 'wordBank' && !lesson.newWords.includes(e.word.id);
+        e.kind !== 'pairs' && e.kind !== 'wordBank' && e.kind !== 'speakIt' && !lesson.newWords.includes(e.word.id);
       if (overshoot > 0 && isReviewRec && !keep.has(e)) {
         overshoot -= 1;
         continue;
@@ -182,6 +193,13 @@ export function generateLesson(lessonId: string, progress: Progress): Exercise[]
   while (graded.length < target && pool.length > 0) {
     const w = pick(pool);
     graded.push(Math.random() < 0.5 ? recognitionEx(w, unitIds, levelIds) : recallEx(w, unitIds, levelIds));
+  }
+
+  // Speak-and-check (Duolingo-style): one word, plus one sentence when
+  // available. Only when the device supports recognition and it's enabled.
+  if (progress.speakPractice !== false && hasRecognition() && pool.length > 0) {
+    graded.push(speakItWord(pick(pool)));
+    if (sentencePool.length > 0 && Math.random() < 0.7) graded.push(speakItSentence(pick(sentencePool)));
   }
 
   return [...intros, ...spread(graded)];
@@ -248,5 +266,7 @@ export function exerciseWordIds(e: Exercise): string[] {
       const byEn = new Map(Object.values(VOCAB).map((v) => [v.en, v.id]));
       return e.sentence.tokens.map((t) => byEn.get(t.t)).filter((x): x is string => Boolean(x));
     }
+    case 'speakIt':
+      return e.wordIds;
   }
 }

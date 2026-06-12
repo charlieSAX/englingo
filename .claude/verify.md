@@ -34,6 +34,26 @@ deployed URL (https://charliesax.github.io/englingo/), not just localhost.
 7. **Build**: `npm run build` on the Mac (rollup native module is macOS-only;
    the Linux sandbox cannot build, only typecheck with `tsc --noEmit`).
 
+## Speak-and-check checks (added 2026-06-12)
+
+8. **SpeakIt in lessons**: with recognition mocked, a 跟住講 exercise appears;
+   wrong transcript → teaching note; two wrongs → 跳過 button (skip advances
+   with no answer recorded); matching transcript → 講得好 banner.
+9. **Mic in Conversation**: on the learner's turn `.co-mic` listens; wrong
+   transcript shows 你講咗：…; matching transcript behaves like the correct tap.
+10. **Pacing**: with a slow TTS mock (2.2s/utterance), consecutive bubbles
+    arrive ≥ the utterance duration apart — nothing is cut off.
+11. **Voice ranking**: with fake voices injected, the Settings picker orders
+    Premium > Enhanced > plain, hides novelty voices (Zarvox, Bubbles…), and
+    auto-pick speaks with the top-ranked voice at rate 0.95.
+12. **Toggle**: 口講練習 off → no mic in dialogues, no speakIt in lessons.
+
+MOCKING GOTCHA: this Chromium exposes BOTH `window.SpeechRecognition` and
+`window.webkitSpeechRecognition` natively — override BOTH or the app will use
+the real (hanging) engine. Also use a plain `window.SpeechSynthesisUtterance`
+replacement when injecting fake voices, because the native utterance's `voice`
+setter rejects non-native voice objects.
+
 ## The lesson-loop snippet
 
 See `.claude/scripts/lesson-loop.js`. Reseed between runs:
